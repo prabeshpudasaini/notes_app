@@ -1,8 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:notes_app/constants/route.dart';
+import 'package:notes_app/services/auth/auth_exceptions.dart';
+import 'package:notes_app/services/auth/auth_service.dart';
 import 'package:notes_app/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -61,34 +62,34 @@ class _RegisterViewState extends State<RegisterView> {
               final email = _email.text;
               final password = _password.text;
               try {
-                final userCredential =
-                    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                final userCredential = await AuthService.firebase().createUser(
                   email: email,
                   password: password,
                 );
-                final user = FirebaseAuth.instance.currentUser;
-                await user?.sendEmailVerification();
+                AuthService.firebase().sendEmailVerification();
                 if (!context.mounted) return;
                 Navigator.of(context).pushNamed(verifyEmailRoute);
                 devtools.log(userCredential.toString());
-              } on FirebaseAuthException catch (e) {
-                if (e.code == 'weak-password') {
-                  if (!context.mounted) return;
-                  await showAlertDialog(context, 'Weak Password');
-                } else if (e.code == 'email-already-in-use') {
-                  if (!context.mounted) return;
-                  await showAlertDialog(context, 'Email is already in use');
-                } else if (e.code == 'invalid-email') {
-                  if (!context.mounted) return;
-                  await showAlertDialog(context, 'Email is Invalid');
-                } else {
-                  if (!context.mounted) return;
-                  await showAlertDialog(
-                      context, 'Error: [${e.code}] \n${e.message}');
-                }
-              } catch (e) {
-                if (!context.mounted) return;
-                await showAlertDialog(context, e.toString());
+              } on WeakPasswordAuthException {
+                await showAlertDialog(
+                  context,
+                  'Weak Password',
+                );
+              } on EmailAlreadyInUseAuthException {
+                await showAlertDialog(
+                  context,
+                  'Email is already in use',
+                );
+              } on InvalidEmailAuthException {
+                await showAlertDialog(
+                  context,
+                  'Email is Invalid',
+                );
+              } on GenericAuthException {
+                await showAlertDialog(
+                  context,
+                  'Unable to Register. Try Again',
+                );
               }
             },
             child: const Text('Register'),
