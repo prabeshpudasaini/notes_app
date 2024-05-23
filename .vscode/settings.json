@@ -1,4 +1,5 @@
 {
     "editor.formatOnSave": true,
-    "IDX.aI.enableInlineCompletion": false
+    "IDX.aI.enableInlineCompletion": false,
+    "workbench.iconTheme": "material-icon-theme"
 }
