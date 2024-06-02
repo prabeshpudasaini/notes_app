@@ -5,6 +5,8 @@ import 'package:notes_app/services/auth/auth_service.dart';
 import 'package:notes_app/services/crud/note_service.dart';
 import 'package:notes_app/utilities/dialogs/logout_dialog.dart';
 import 'package:notes_app/views/notes/notes_list_view.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -75,10 +77,22 @@ class _NotesViewState extends State<NotesView> {
                       if (snapshot.hasData) {
                         final allNotes = snapshot.data as List<DatabaseNote>;
                         print(allNotes);
+
                         return NotesListView(
                           notes: allNotes,
                           onDeleteNote: (note) async {
                             await _noteService.deleteNote(id: note.id);
+                          },
+                          onTap: (note) async {
+                            final docsPath =
+                                await getApplicationDocumentsDirectory();
+                            final dbPath = join(docsPath.path, dbName);
+                            print(dbPath);
+
+                            Navigator.of(context).pushNamed(
+                              createOrUpdateNoteRoute,
+                              arguments: note,
+                            );
                           },
                         );
                       } else {
