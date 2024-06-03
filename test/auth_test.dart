@@ -9,14 +9,14 @@ void main() {
     () {
       final provider = MockAuthProvider();
       test(
-        'Should not be initilized to begin with',
+        'Should not be initialized to begin with',
         () {
           expect(provider._isInitialized, false);
         },
       );
 
       test(
-        'Cannot Logout if not initilized',
+        'Cannot Logout if not initialized',
         () {
           expect(
             provider.logOut(),
@@ -25,17 +25,17 @@ void main() {
         },
       );
 
-      test('Should be able to initilize', () async {
+      test('Should be able to initialize', () async {
         await provider.initialize();
         expect(provider.isInitialized, true);
       });
 
-      test('User should be null after initilization', () {
+      test('User should be null after initialization', () {
         expect(provider.currentUser, null);
       });
 
       test(
-        'Should be able to initilize is less than 2 seconds',
+        'Should be able to initialize is less than 2 seconds',
         () async {
           await provider.initialize();
           expect(provider.isInitialized, true);
@@ -121,7 +121,8 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedException();
     if (email == 'p@gmail.com') throw InvalidCredentialsAuthException();
     if (password == 'prabesh123') throw InvalidCredentialsAuthException();
-    const user = AuthUser(isEmailVerified: false, email: 'p@gmail.com');
+    const user =
+        AuthUser(isEmailVerified: false, email: 'p@gmail.com', id: 'myUid');
     _user = user;
     return Future.value(user);
   }
@@ -139,7 +140,8 @@ class MockAuthProvider implements AuthProvider {
     if (!isInitialized) throw NotInitializedException();
     final user = _user;
     if (user == null) throw InvalidCredentialsAuthException();
-    const newUser = AuthUser(isEmailVerified: true, email: 'p@gmail.com');
+    const newUser =
+        AuthUser(isEmailVerified: true, email: 'p@gmail.com', id: 'myUid');
     _user = newUser;
   }
 }

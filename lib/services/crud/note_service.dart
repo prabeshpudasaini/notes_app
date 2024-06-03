@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:notes_app/extensions/list/filter.dart';
 import 'package:notes_app/services/crud/crud_exception.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -32,6 +33,7 @@ const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note"(
 
 class NotesService {
   Database? _db;
+  DatabaseUser? _user;
   List<DatabaseNote> _notes = [];
   late final StreamController<List<DatabaseNote>> _notesStreamController;
 
@@ -45,7 +47,15 @@ class NotesService {
   }
   factory NotesService() => _shared;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotesException();
+        }
+      });
 
   Future<void> _cacheNotes() async {
     final allNotes = await getAllNotes();
@@ -135,12 +145,19 @@ class NotesService {
     return DatabaseUser.fromRow(results.first);
   }
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser(
+      {required String email, bool setAsCurrentUser = true}) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on CouldNotFindUserException {
       final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow;
@@ -258,10 +275,15 @@ class NotesService {
 
     await getNote(id: note.id);
 
-    final updatesCount = await db.update(noteTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
+    final updatesCount = await db.update(
+      noteTable,
+      {
+        textColumn: text,
+        isSyncedWithCloudColumn: 0,
+      },
+      where: 'id = ?',
+      whereArgs: [note.id],
+    );
 
     if (updatesCount == 0) {
       throw CouldNotUpdateNoteException();
