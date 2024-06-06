@@ -84,8 +84,7 @@ class _NotesViewState extends State<NotesView> {
                   },
                 );
               } else {
-                return const Text(
-                    'No Notes Found. Click + button to add a new note');
+                return const CircularProgressIndicator();
               }
             default:
               return const CircularProgressIndicator();
