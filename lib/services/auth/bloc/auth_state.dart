@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart' show immutable;
 import 'package:notes_app/services/auth/auth_user.dart';
 
@@ -24,9 +25,15 @@ class AuthStateNeedsVerification extends AuthState {
   const AuthStateNeedsVerification();
 }
 
-class AuthStateLoggedOut extends AuthState {
+class AuthStateLoggedOut extends AuthState with EquatableMixin {
   final Exception? exception;
   final bool isLoading;
 
-  const AuthStateLoggedOut({required this.exception, required this.isLoading});
+  const AuthStateLoggedOut({
+    required this.exception,
+    required this.isLoading,
+  });
+
+  @override
+  List<Object?> get props => [exception, isLoading];
 }
