@@ -45,7 +45,13 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     context.read<AuthBloc>().add(const AuthEventInitialize());
 
-    return BlocBuilder<AuthBloc, AuthState>(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        
+      
+        
+           
+      },
       builder: (context, state) {
         if (state is AuthStateLoggedIn) {
           return const NotesView();
